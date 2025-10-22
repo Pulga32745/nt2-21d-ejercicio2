@@ -1,47 +1,108 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <div class="container mt-4">
+    <h1>Buscador de Personas</h1>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+    <input
+      type="text"
+      class="form-control mb-2"
+      placeholder="Buscar por nombre o apellido"
+      v-model="filtroNombre"
+    />
+
+    <input
+      type="text"
+      class="form-control mb-2"
+      placeholder="Buscar por DNI"
+      v-model="filtroDni"
+    />
+
+    <div v-if="mostrarAdvertencia" class="alert alert-warning mt-3">
+      ⚠️ Debes ingresar al menos 3 caracteres en alguno de los filtros.
     </div>
-  </header>
 
-  <main>
-    <TheWelcome />
-  </main>
+    
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-3">
+      <div class="col" v-for="persona in personasFiltradas" :key="persona.dni">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ getNombreCompleto(persona) }}</h5>
+            <p class="card-text">DNI: {{ persona.dni }}</p>
+            <a href="#" class="card-link">{{ persona.correo }}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-}
+<script>
+export default {
+  name: "App",
+  data() {
+    return {
+      filtroNombre: "",
+      filtroDni: "",
+     personas: [
+        {
+          nombre: "Daniel",
+          apellido: "Sanchez",
+          correo: "danielsanchez68@hotmail.com",
+          dni: "20442873",
+        },
+        {
+          nombre: "Juan",
+          apellido: "Perez",
+          correo: "j@p.gmail.com",
+          dni: "12345678",
+        },
+        {
+          nombre: "Ana",
+          apellido: "Suarez",
+          correo: "a@s.gmail.com",
+          dni: "87654321",
+        },
+        {
+          nombre: "Matías",
+          apellido: "Gaya",
+          correo: "matutegaya@gmail.com",
+          dni: "46287967",
+        },
+      ],
+    };
+  },
+  computed: {
+    mostrarAdvertencia() {
+      return (
+        (this.filtroNombre.length > 0 && this.filtroNombre.length < 3) ||
+        (this.filtroDni.length > 0 && this.filtroDni.length < 3)
+      );
+    },
+    personasFiltradas() {
+      if (this.mostrarAdvertencia) return [];
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+      if (!this.filtroNombre && !this.filtroDni) return this.personas;
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+      if (this.filtroNombre && !this.filtroDni) {
+        return this.personas.filter((p) =>
+          `${p.nombre} ${p.apellido}`.toLowerCase().includes(this.filtroNombre.toLowerCase())
+        );
+      }
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+      if (this.filtroDni && !this.filtroNombre) {
+        return this.personas.filter((p) => p.dni.includes(this.filtroDni));
+      }
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
-</style>
+      return this.personas.filter(
+        (p) =>
+          `${p.nombre} ${p.apellido}`.toLowerCase().includes(this.filtroNombre.toLowerCase()) &&
+          p.dni.includes(this.filtroDni)
+      );
+    },
+  },
+  methods: {
+    getNombreCompleto(p) {
+      return `${p.nombre} ${p.apellido}`;
+    },
+  },
+};
+</script>
